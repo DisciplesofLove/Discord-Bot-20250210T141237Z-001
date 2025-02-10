@@ -1,0 +1,143 @@
+const { Client, GatewayIntentBits } = require('discord.js');
+const { ChatFileHandler } = require('./chat-file-handler');
+const CommandHandler = require('./commands');
+const path = require('path');
+require('dotenv').config();
+
+class AIDiscordBot {
+    constructor() {
+        this.commandHandler = new CommandHandler();
+        this.client = new Client({
+            intents: [
+                GatewayIntentBits.Guilds,
+                GatewayIntentBits.GuildMessages,
+                GatewayIntentBits.MessageContent,
+                GatewayIntentBits.GuildMessageReactions
+            ],
+        });
+    }
+
+    async initialize() {
+        // Load commands
+        await this.loadCommands();
+        
+        // Set up event handlers
+        this.setupEventHandlers();
+        
+        // Login
+        await this.client.login(process.env.DISCORD_TOKEN);
+    }
+
+    async loadCommands() {
+        const commandFiles = [
+            path.join(__dirname, 'commands', 'help.js'),
+            path.join(__dirname, 'commands', 'ping.js'),
+            path.join(__dirname, 'commands', 'echo.js'),
+            path.join(__dirname, 'commands', 'chattofile.js')
+        ];
+
+        for (const file of commandFiles) {
+            const command = require(file);
+            this.commandHandler.registerCommand(command);
+        }
+    }
+
+    async handleCodeBlock(message) {
+        if (message.author.bot) return;
+
+        const codeBlockRegex = /```(\w+)?\n([\s\S]+?)\n```/g;
+        const codeBlocks = [...message.content.matchAll(codeBlockRegex)];
+
+        if (codeBlocks.length > 0) {
+            const chatFileHandler = new ChatFileHandler(this.aiCodeService);
+            
+            for (const [, language, code] of codeBlocks) {
+                const defaultName = `${message.author.username}_${Date.now()}`;
+                const prompt = await message.reply({
+                    content: 'I detected a code block. Would you like me to save it as a file? React with:\n' +
+                            '✅ to save with auto-generated name\n' +
+                            '📝 to specify a custom filename',
+                    fetchReply: true
+                });
+                
+                await prompt.react('✅');
+                await prompt.react('📝');
+                
+                try {
+                    const filter = (reaction, user) => 
+                        ['✅', '📝'].includes(reaction.emoji.name) && user.id === message.author.id;
+                    const collected = await prompt.awaitReactions({ filter, max: 1, time: 30000 });
+                    
+                    const reaction = collected.first();
+                    if (!reaction) {
+                        await prompt.delete().catch(() => {});
+                        return;
+                    }
+                    
+                    let filename;
+                    if (reaction.emoji.name === '📝') {
+                        await prompt.edit('Please enter the filename:');
+                        const response = await message.channel.awaitMessages({
+                            filter: m => m.author.id === message.author.id,
+                            max: 1,
+                            time: 30000
+                        });
+                        
+                        if (!response.first()) {
+                            await prompt.edit('No filename provided - operation cancelled.');
+                            return;
+                        }
+                        
+                        filename = response.first().content;
+                        await response.first().delete().catch(() => {});
+                    } else {
+                        filename = defaultName;
+                    }
+                    
+                    const result = await chatFileHandler.createFileFromChat(code.trim(), filename);
+                    await prompt.edit(result.success ? result.message : `Error: ${result.error}`);
+                    
+                } catch (error) {
+                    await prompt.edit(`Error: ${error.message}`);
+                }
+            }
+        }
+    }
+
+    setupEventHandlers() {
+        this.client.once('ready', () => {
+            console.log('AI Discord Bot is ready!');
+            console.log(`Loaded ${this.commandHandler.commands.size} commands`);
+        });
+
+        this.client.on('messageCreate', async (message) => {
+            if (message.author.bot) return;
+            
+            // Check for code blocks first
+            await this.handleCodeBlock(message);
+
+            try {
+                await this.commandHandler.processMessage(message);
+            } catch (error) {
+                console.error('Error processing message:', error);
+                await message.reply('There was an error processing your message.');
+            }
+        });
+
+        this.client.on('interactionCreate', async (interaction) => {
+            if (!interaction.isCommand()) return;
+
+            try {
+                await this.commandHandler.handleInteraction(interaction, this);
+            } catch (error) {
+                console.error('Error handling interaction:', error);
+                await interaction.reply({ 
+                    content: 'There was an error executing this command.',
+                    ephemeral: true
+                });
+            }
+        });
+    }
+}
+
+module.exports = AIDiscordBot;

@@ -1,0 +1,79 @@
+version: '3.8'
+
+networks:
+  p2p-net:
+    driver: bridge
+
+services:
+  ipfs:
+    image: ipfs/go-ipfs:latest
+    ports:
+      - "4001:4001"
+      - "5001:5001"
+      - "8080:8080"
+    volumes:
+      - ./ipfs-data:/data/ipfs
+    networks:
+      - p2p-net
+      
+  orbitdb:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.orbitdb
+    volumes:
+      - ./orbitdb-data:/app/orbitdb
+      - .:/app
+    depends_on:
+      - ipfs
+    networks:
+      - p2p-net
+      
+  gun:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.gun
+    ports:
+      - "8765:8765"
+    volumes:
+      - ./gun-data:/app/data
+      - .:/app
+    depends_on:
+      - ipfs
+    networks:
+      - p2p-net
+
+  iota-node:
+    image: iotaledger/hornet:latest
+    ports:
+      - "14265:14265"
+      - "15600:15600"
+    volumes:
+      - ./iota-data:/app/hornet/data
+    environment:
+      - HORNET_PROOF_OF_WORK_ENABLED=true
+    networks:
+      - p2p-net
+
+  discord-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    env_file: .env
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - ipfs
+      - orbitdb
+      - gun
+      - iota-node
+    networks:
+      - p2p-net
+
+volumes:
+  ipfs-data:
+  orbitdb-data:
+  gun-data:
+  iota-data:
