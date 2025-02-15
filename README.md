@@ -1,49 +1,49 @@
 # AI-Powered Decentralized Discord Bot with DAO Governance
 
-This project implements an advanced Discord bot leveraging AI, blockchain, and decentralized technologies to provide a robust platform for community engagement, governance, and AI model marketplace.
+This project implements an advanced Discord bot leveraging AI, blockchain, and decentralized technologies to provide a robust platform for community engagement, governance, and AI model marketplace with a focus on decentralized deployment and operation.
 
 ## Project Description
 
 This Discord bot is a cutting-edge application that combines artificial intelligence, blockchain technology, and decentralized infrastructure to create a powerful platform for Discord communities. The bot offers a wide range of features, including AI model training and marketplace integration, decentralized autonomous organization (DAO) governance, and robust peer-to-peer (P2P) data management.
 
 Key features include:
-- AI model training and fine-tuning using decentralized compute resources
+- AI model training and fine-tuning using decentralized compute resources (Akash Network)
 - Marketplace for buying, selling, and leasing AI models
 - DAO governance system for community decision-making
 - Decentralized data storage and retrieval using IPFS and OrbitDB
 - Integration with multiple blockchain networks (Ethereum, IOTA)
 - Advanced error handling and monitoring
+- Fully decentralized deployment and operation
 
-The bot is designed to be highly scalable, secure, and resilient, leveraging decentralized technologies to ensure high availability and data integrity. It provides a comprehensive suite of commands for users to interact with various aspects of the system, from AI model management to participation in DAO governance.
+The bot is designed to be highly scalable, secure, and resilient, leveraging decentralized technologies to ensure high availability and data integrity. It provides a comprehensive suite of commands for users to interact with various aspects of the system, from AI model management to participation in DAO governance, all while maintaining a decentralized architecture.
 
 ## Repository Structure
 
-The repository is organized into several key directories:
+The repository is organized into several key directories, with a focus on decentralized components:
 
 - `backend/`: Contains the core backend services and API routes
   - `src/`: Source code for the backend
     - `controllers/`: Request handlers for different API endpoints
     - `models/`: Database models for MongoDB
     - `routes/`: API route definitions
-    - `services/`: Core business logic implementations
+    - `services/`: Core business logic implementations, including decentralized services
 - `Discord Bot/`: Main Discord bot implementation
   - `commands/`: Individual command implementations
   - `events/`: Event handlers for Discord events
   - `middleware/`: Custom middleware for command processing
-  - `utils/`: Utility functions and helpers
-- `smart-contracts/`: Ethereum smart contracts
+  - `utils/`: Utility functions and helpers, including P2P and blockchain utilities
+- `smart-contracts/`: Ethereum and IOTA smart contracts
   - `contracts/`: Solidity contract files
-  - `scripts/`: Deployment and management scripts
+  - `scripts/`: Deployment and management scripts for decentralized networks
   - `test/`: Contract test files
-- `scripts/`: Various utility and setup scripts
-- `tests/`: Test suites for different components
+- `scripts/`: Various utility and setup scripts, including decentralized deployment scripts
 
 Key Files:
 - `Discord Bot/bot.js`: Main entry point for the Discord bot
 - `Discord Bot/backend/src/app.js`: Express.js application setup
 - `Discord Bot/backend/src/server.js`: Server initialization
-- `Discord Bot/scripts/deploy1.js`: Main deployment script for smart contracts
-- `Discord Bot/scripts/setup.sh`: Environment setup script
+- `Discord Bot/scripts/deploy1.js`: Main deployment script for smart contracts on decentralized networks
+- `Discord Bot/scripts/setup.sh`: Environment setup script for decentralized infrastructure
 - `Discord Bot/package.json`: Project dependencies and scripts
 
 ## Usage Instructions
@@ -52,15 +52,15 @@ Key Files:
 
 Prerequisites:
 - Node.js v16.0.0 or higher
-- MongoDB
 - IPFS node
 - Ethereum node (for blockchain integration)
+- Akash Network CLI (for decentralized compute)
 
 Steps:
 1. Clone the repository
 2. Run `npm install` to install dependencies
 3. Copy `.env.example` to `.env` and fill in the required environment variables
-4. Run `npm run setup` to initialize the environment and database
+4. Run `npm run setup` to initialize the environment and decentralized infrastructure
 
 ### Getting Started
 
@@ -72,16 +72,16 @@ Steps:
 
 Key configuration files:
 - `.env`: Environment variables
-- `Discord Bot/backend/src/config/`: Configuration files for various services
+- `Discord Bot/backend/src/config/`: Configuration files for various decentralized services
 
 ### Common Use Cases
 
-1. Training an AI model:
+1. Training an AI model using decentralized compute:
    ```
    /train dataset:<IPFS_HASH> parameters:{"epochs": 10, "batch_size": 32}
    ```
 
-2. Listing a model on the marketplace:
+2. Listing a model on the decentralized marketplace:
    ```
    /list model_id:<MODEL_ID> price:100
    ```
@@ -94,8 +94,8 @@ Key configuration files:
 ### Integration Patterns
 
 - Use the provided `AIService` to integrate AI functionality into custom commands
-- Leverage the `BlockchainService` for interacting with smart contracts
-- Utilize the `P2PManager` for decentralized data storage and retrieval
+- Leverage the `BlockchainService` for interacting with smart contracts on Ethereum and IOTA
+- Utilize the `P2PManager` for decentralized data storage and retrieval using IPFS and OrbitDB
 
 ### Testing & Quality
 
@@ -132,36 +132,37 @@ The Discord bot processes user commands through a series of steps, integrating v
 2. Command parsing: Bot parses the command and validates input
 3. Middleware processing: Rate limiting, permissions, and input validation
 4. Service interaction: Bot interacts with relevant services (AI, Blockchain, P2P)
-5. External API calls: Interaction with Akash, IPFS, or other external services
+5. External API calls: Interaction with Akash, IPFS, or other decentralized services
 6. Data storage/retrieval: Storing or fetching data from OrbitDB or IPFS
-7. Smart contract interaction: Executing functions on Ethereum contracts
+7. Smart contract interaction: Executing functions on Ethereum or IOTA contracts
 8. Response generation: Preparing and sending response to user
 
 ```
 [Discord User] -> [Discord API] -> [Bot Command Handler]
     -> [Middleware (Rate Limit, Permissions, Validation)]
     -> [Service Layer (AI, Blockchain, P2P)]
-    -> [External APIs (Akash, IPFS)] <-> [Decentralized Storage (OrbitDB, IPFS)]
-    -> [Smart Contracts] <-> [Ethereum Network]
+    -> [Decentralized Services (Akash, IPFS)] <-> [Decentralized Storage (OrbitDB, IPFS)]
+    -> [Smart Contracts] <-> [Ethereum/IOTA Networks]
     -> [Response Formatter] -> [Discord API] -> [Discord User]
 ```
 
-Note: The bot uses a circuit breaker pattern to handle failures in external service calls, ensuring resilience and fault tolerance.
+Note: The bot uses a circuit breaker pattern to handle failures in external service calls, ensuring resilience and fault tolerance across decentralized components.
 
 ## Deployment
 
 Prerequisites:
 - Docker
-- AWS CLI (for AWS deployment)
-- Kubernetes cluster (optional)
+- Akash Network CLI
+- IPFS CLI
+- Ethereum wallet with sufficient funds for contract deployment
 
 Deployment steps:
 1. Build Docker image: `docker build -t discord-bot .`
-2. Push image to container registry
-3. Deploy using preferred method:
-   - Docker: `docker run -d --env-file .env discord-bot`
-   - Kubernetes: `kubectl apply -f k8s/`
-   - AWS ECS: Use `scripts/deployment/deploy-backend.js`
+2. Push image to a decentralized container registry (e.g., Akash)
+3. Deploy using one of the following methods:
+   - Akash Network: Use `scripts/deployment/deploy-akash.js`
+   - IPFS + Ethereum: Use `scripts/deployment/deploy-ipfs-eth.js`
+   - Decentralized cluster: Use `scripts/deployment/deploy-cluster.js`
 
 Environment configurations:
 - Development: Use `.env.development`
@@ -169,28 +170,24 @@ Environment configurations:
 - Production: Use `.env.production`
 
 Monitoring setup:
-- Configure Sentry DSN in `.env` for error tracking
-- Set up Prometheus for metrics collection
-- Use provided `scripts/monitor.sh` for basic health checks
+- Configure Sentry DSN in `.env` for decentralized error tracking
+- Set up Prometheus for metrics collection across decentralized nodes
+- Use provided `scripts/monitor.sh` for basic health checks of decentralized components
 
-## Infrastructure
+## Decentralized Infrastructure
 
-The project utilizes several infrastructure resources defined in deployment scripts:
+The project utilizes several decentralized infrastructure components:
 
-Lambda:
-- `verifyDeployment`: Verifies the deployment of the Discord bot
+- IPFS: Used for decentralized file storage and content addressing
+- OrbitDB: Provides a decentralized database built on top of IPFS
+- Ethereum: Smart contracts for DAO governance and token management
+- IOTA: Used for feeless transactions and data integrity
+- Akash Network: Decentralized compute resources for AI model training
 
-ECS:
-- `DiscordBotService`: Main ECS service running the Discord bot containers
+Key decentralized services:
+- `IPFSService`: Handles interaction with the IPFS network
+- `OrbitDBService`: Manages decentralized database operations
+- `BlockchainService`: Interacts with Ethereum and IOTA networks
+- `AkashService`: Manages deployment of training environments on Akash Network
 
-S3:
-- `BackupBucket`: Stores backups of the bot's data
-
-DynamoDB:
-- `CommandHistoryTable`: Stores command execution history for analytics
-
-CloudWatch:
-- `BotLogGroup`: Collects logs from the Discord bot containers
-
-IAM:
-- `BotExecutionRole`: IAM role for the bot's ECS tasks, granting necessary permissions
+By leveraging these decentralized technologies, the Discord bot achieves a high level of resilience, scalability, and censorship resistance.
