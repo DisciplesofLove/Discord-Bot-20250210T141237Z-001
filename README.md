@@ -52,9 +52,10 @@ Key Files:
 
 Prerequisites:
 - Node.js v16.0.0 or higher
-- IPFS node
-- Ethereum node (for blockchain integration)
-- Akash Network CLI (for decentralized compute)
+- Akash Network CLI (`akash`)
+- IPFS CLI (`ipfs`)
+- OrbitDB
+- Docker
 
 Steps:
 1. Clone the repository
@@ -152,31 +153,78 @@ Note: The bot uses a circuit breaker pattern to handle failures in external serv
 
 Prerequisites:
 - Docker
-- Akash Network CLI
-- IPFS CLI
-- Ethereum wallet with sufficient funds for contract deployment
+- Akash Network CLI (`akash`)
+- IPFS CLI (`ipfs`)
+- OrbitDB
 
-Deployment steps:
-1. Build Docker image: `docker build -t discord-bot .`
-2. Push image to a decentralized container registry (e.g., Akash)
-3. Deploy using one of the following methods:
-   - Akash Network: Use `scripts/deployment/deploy-akash.js`
-   - IPFS + Ethereum: Use `scripts/deployment/deploy-ipfs-eth.js`
-   - Decentralized cluster: Use `scripts/deployment/deploy-cluster.js`
+Deployment Steps:
 
-Environment configurations:
-- Development: Use `.env.development`
-- Staging: Use `.env.staging`
-- Production: Use `.env.production`
+1. Build Docker image:
+   ```bash
+   docker build -t discord-bot .
+   ```
 
-Monitoring setup:
-- Configure Sentry DSN in `.env` for decentralized error tracking
-- Set up Prometheus for metrics collection across decentralized nodes
-- Use provided `scripts/monitor.sh` for basic health checks of decentralized components
+2. Push image to decentralized registry (IPFS-based)
 
-## Decentralized Infrastructure
+3. Deploy to Akash Network:
+   ```bash
+   # Initialize deployment
+   akash tx deployment create deployment.yml --from wallet
+   # Accept provider bid
+   akash tx market lease create --from wallet --provider selected-provider
+   ```
 
-The project utilizes several decentralized infrastructure components:
+4. Setup decentralized services:
+   ```bash
+   # Initialize IPFS storage
+   ipfs init
+   ipfs daemon
+
+   # Setup OrbitDB
+   node scripts/setup/init-orbitdb.js
+   ```
+
+Environment Configuration:
+
+Use appropriate .env files with decentralized configurations:
+- Development: `.env.development.decentralized`
+- Staging: `.env.staging.decentralized`
+- Production: `.env.production.decentralized`
+
+Monitoring Setup:
+
+1. Deploy monitoring stack on Akash:
+   ```bash
+   akash tx deployment create monitoring/prometheus-deployment.yml
+   ```
+
+2. Configure Grafana dashboards:
+   ```bash
+   node scripts/setup/setup-monitoring.js
+   ```
+
+3. Monitor decentralized components:
+   - IPFS node health and network metrics
+   - OrbitDB replication status
+   - Akash deployment status
+   - Custom application metrics
+
+## Decentralized Infrastructure Components
+
+The project is designed to run entirely on decentralized infrastructure:
+
+### Core Components:
+- **Compute**: Akash Network provides decentralized computing resources
+- **Storage**: IPFS handles distributed file storage
+- **Database**: OrbitDB manages decentralized data storage
+- **Monitoring**: Self-hosted Prometheus and Grafana
+
+### Key Features:
+- Fully decentralized compute layer using Akash Network
+- Distributed storage and content addressing via IPFS
+- Decentralized database with automatic replication using OrbitDB
+- Scalable and fault-tolerant architecture
+- No single point of failure
 
 - IPFS: Used for decentralized file storage and content addressing
 - OrbitDB: Provides a decentralized database built on top of IPFS

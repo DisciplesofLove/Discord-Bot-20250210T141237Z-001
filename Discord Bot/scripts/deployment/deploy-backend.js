@@ -24,28 +24,15 @@ async function deployBackend() {
         const configDest = path.join(__dirname, '../../dist/config.json');
         fs.copyFileSync(configSource, configDest);
 
-        // Deploy to server
-        console.log('Deploying to server...');
-        // Add your deployment logic here (e.g., AWS, Docker, etc.)
+        // Deploy to decentralized infrastructure
+        console.log('Starting decentralized deployment...');
+        const deployDecentralized = require('./deploy-decentralized');
+        const deployment = await deployDecentralized();
         
-        if (process.env.DEPLOY_PLATFORM === 'akash') {
-            // Akash deployment logic
-            console.log('Deploying to Akash...');
-            const AkashService = require('../../src/services/core/akash.service');
-            const akash = new AkashService();
-            const deploymentId = await akash.deployTrainingEnvironment({
-                model: 'backend',
-                datasetPath: './dist',
-                parameters: {
-                    environment: process.env.DEPLOY_ENV
-                }
-            });
-            console.log(`Deployment created on Akash with ID: ${deploymentId}`);
-        } else if (process.env.DEPLOY_PLATFORM === 'docker') {
-            // Docker deployment logic
-            console.log('Deploying with Docker...');
-            execSync('docker-compose up -d', { stdio: 'inherit' });
-        }
+        console.log('Deployment Summary:');
+        console.log(`- Deployment ID: ${deployment.deploymentId}`);
+        console.log(`- IPFS Hash: ${deployment.ipfsHash}`);
+        console.log(`- OrbitDB Address: ${deployment.dbAddress}`);
 
         console.log('Backend deployment completed successfully');
     } catch (error) {

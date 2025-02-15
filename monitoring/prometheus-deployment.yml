@@ -1,0 +1,66 @@
+version: "2.0"
+
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    env:
+      - CONFIG_PATH=/etc/prometheus/prometheus.yml
+    expose:
+      - port: 9090
+        as: 9090
+        to:
+          - global: true
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.console.libraries=/usr/share/prometheus/console_libraries
+      - --web.console.templates=/usr/share/prometheus/consoles
+
+  grafana:
+    image: grafana/grafana:latest
+    env:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+    expose:
+      - port: 3000
+        as: 3000
+        to:
+          - global: true
+
+profiles:
+  compute:
+    prometheus:
+      resources:
+        cpu:
+          units: 1.0
+        memory:
+          size: 2Gi
+        storage:
+          - size: 10Gi
+    grafana:
+      resources:
+        cpu:
+          units: 1.0
+        memory:
+          size: 2Gi
+        storage:
+          - size: 5Gi
+
+  placement:
+    dcloud:
+      pricing:
+        prometheus:
+          denom: uakt
+          amount: 500
+        grafana:
+          denom: uakt
+          amount: 500
+
+deployment:
+  prometheus:
+    dcloud:
+      profile: prometheus
+      count: 1
+  grafana:
+    dcloud:
+      profile: grafana
+      count: 1

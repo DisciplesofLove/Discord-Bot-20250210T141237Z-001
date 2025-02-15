@@ -1,0 +1,43 @@
+version: "2.0"
+
+services:
+  discord-bot:
+    image: ${DOCKER_IMAGE}
+    env:
+      - DISCORD_TOKEN=${DISCORD_TOKEN}
+      - AKASH_PROVIDER_URL=${AKASH_PROVIDER_URL}
+      - AKASH_WALLET_ADDRESS=${AKASH_WALLET_ADDRESS}
+      - IPFS_NODE_URL=${IPFS_NODE_URL}
+      - IPFS_GATEWAY=${IPFS_GATEWAY}
+      - ORBITDB_PATH=${ORBITDB_PATH}
+      - ORBITDB_IDENTITY=${ORBITDB_IDENTITY}
+      - PROMETHEUS_ENDPOINT=${PROMETHEUS_ENDPOINT}
+      - GRAFANA_URL=${GRAFANA_URL}
+    expose:
+      - port: 3000
+        as: 80
+        to:
+          - global: true
+    
+profiles:
+  compute:
+    discord-bot:
+      resources:
+        cpu:
+          units: 2.0
+        memory:
+          size: 4Gi
+        storage:
+          - size: 20Gi
+  placement:
+    dcloud:
+      pricing:
+        discord-bot:
+          denom: uakt
+          amount: 1000
+
+deployment:
+  discord-bot:
+    dcloud:
+      profile: discord-bot
+      count: 1
