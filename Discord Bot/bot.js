@@ -1,8 +1,10 @@
 const { Client, GatewayIntentBits } = require('discord.js');
-const AIService = require('./backend/src/services/core/ai.service');
-const MarketplaceService = require('./backend/src/services/marketplace/marketplace.service');
-const NFTService = require('./backend/src/services/marketplace/nft.service');
-const CommandHandler = require('./commands');
+const AIService = require('./services/core/ai.service');
+const MarketplaceService = require('./services/marketplace/marketplace.service');
+const NFTService = require('./services/marketplace/nft.service');
+const PlatformService = require('./services/core/platform.service');
+const DAOService = require('./services/governance/dao.service');
+const CommandHandler = require('./commands/command-handler.js');
 const path = require('path');
 require('dotenv').config();
 
@@ -14,6 +16,15 @@ class AIDiscordBot {
         this.marketplaceService = new MarketplaceService();
         this.nftService = new NFTService();
         this.daoService = new DAOService();
+        
+        // Make services available to commands
+        this.services = {
+            ai: this.aiService,
+            platform: this.platformService,
+            marketplace: this.marketplaceService,
+            nft: this.nftService,
+            dao: this.daoService
+        };
         this.client = new Client({
             intents: [
                 GatewayIntentBits.Guilds,
@@ -31,10 +42,20 @@ class AIDiscordBot {
         this.setupEventHandlers();
         
         // Login
-        await this.client.login(process.env.DISCORD_TOKEN);
+        if (!process.env.DISCORD_TOKEN) {
+            throw new Error('DISCORD_TOKEN is not set in environment variables');
+        }
+        try {
+            await this.client.login(process.env.DISCORD_TOKEN);
+            console.log('Successfully logged in to Discord');
+        } catch (error) {
+            console.error('Failed to login to Discord:', error);
+            throw error;
+        }
     }
 
     async loadCommands() {
+        console.log('Loading commands...');
         const commandFiles = [
             path.join(__dirname, 'commands', 'help.js'),
             path.join(__dirname, 'commands', 'ping.js'),
@@ -43,7 +64,12 @@ class AIDiscordBot {
 
         for (const file of commandFiles) {
             const command = require(file);
-            this.commandHandler.registerCommand(command);
+            if (command) {
+                this.commandHandler.registerCommand(command);
+                console.log(`Loaded command: ${command.name}`);
+            } else {
+                console.error(`Failed to load command from file: ${file}`);
+            }
         }
     }
 
@@ -66,3 +92,9 @@ class AIDiscordBot {
 }
 
 module.exports = AIDiscordBot;
+
+// Create and initialize bot instance when this file is run directly
+if (require.main === module) {
+    const bot = new AIDiscordBot();
+    bot.initialize().catch(console.error);
+}

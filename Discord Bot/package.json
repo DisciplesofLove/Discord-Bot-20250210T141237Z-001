@@ -2,23 +2,11 @@
   "name": "decentralized-discord-bot",
   "version": "1.0.0",
   "description": "Fully decentralized Discord bot with P2P capabilities",
-  "main": "discord-bot/bot.js",
+  "main": "bot.js",
   "dependencies": {
-    "@sentry/node": "^7.0.0",
-    "aws-sdk": "^2.1000.0",
-    "cls-hooked": "^4.2.2",
     "discord.js": "^14.11.0",
     "dotenv": "^16.0.3",
-    "express-rate-limit": "^6.0.0",
-    "gun": "^0.2020.1235",
-    "ipfs": "^0.65.0",
-    "libp2p": "^0.42.0",
-    "libp2p-tcp": "^0.17.2",
-    "libp2p-mplex": "^0.10.7",
-    "libp2p-noise": "^4.0.0",
-    "orbit-db": "^0.28.0",
-    "prom-client": "^14.0.0",
-    "web3": "^1.9.0",
+    "@sentry/node": "^7.0.0",
     "winston": "^3.8.0"
   },
   "devDependencies": {
@@ -30,66 +18,21 @@
     "prettier": "^2.8.8"
   },
   "scripts": {
-    "start": "node discord-bot/bot.js",
-    "dev": "nodemon discord-bot/bot.js",
-    "start:p2p": "npm-run-all --parallel start:gun start:orbitdb",
-    "start:gun": "node scripts/start-gun.js",
-    "start:orbitdb": "node scripts/start-orbitdb.js",
-    "build": "npm run build:bot",
-    "build:bot": "echo 'No build step required for JS bot'",
-    "deploy": "npm-run-all --serial deploy:prepare deploy:bot deploy:verify",
-    "deploy:prepare": "npm run setup && npm test",
-    "deploy:bot": "node scripts/deployment/deploy-bot.js",
-    "deploy:verify": "node scripts/deployment/verify-deployment.js",
-    "setup": "npm-run-all --serial setup:env setup:p2p setup:db setup:discord",
-    "setup:env": "node scripts/setup/setup-environment.js",
-    "setup:p2p": "node scripts/setup/setup-p2p.js",
-    "setup:db": "node scripts/setup/init-db.js",
-    "setup:discord": "node discord-bot/deploy-commands.js",
+    "start": "node bot.js",
+    "dev": "nodemon bot.js --watch .",
     "test": "jest --coverage",
-    "test:unit": "jest tests/unit",
-    "test:integration": "jest tests/integration",
-    "test:e2e": "jest tests/e2e",
-    "test:watch": "jest --watch",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "backup": "node scripts/backup.js",
-    "restore": "node scripts/restore.js",
-    "monitor": "node scripts/setup/setup-monitoring.js",
-    "security:audit": "npm audit",
-    "security:rotate-keys": "node scripts/security/rotate-keys.js",
-    "docker:build": "docker build -t decentralized-discord-bot .",
-    "docker:run": "docker run -d --name discord-bot decentralized-discord-bot"
-  },
-  "jest": {
-    "testEnvironment": "node",
-    "coverageDirectory": "coverage",
-    "collectCoverageFrom": [
-      "discord-bot/**/*.js",
-      "!discord-bot/tests/**"
-    ],
-    "setupFiles": [
-      "dotenv/config"
-    ]
+    "build": "echo 'No build step required for JS bot'",
+    "setup:discord": "node commands/deploy-commands.js",
+    "test:unit": "jest tests/unit",
+    "test:integration": "jest tests/integration",
+    "test:watch": "jest --watch"
   },
   "engines": {
     "node": ">=16.0.0"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/yourusername/decentralized-discord-bot.git"
-  },
-  "keywords": [
-    "discord",
-    "bot",
-    "decentralized",
-    "p2p",
-    "ipfs",
-    "blockchain",
-    "web3"
-  ],
   "author": "",
   "license": "MIT"
-}
 }
   

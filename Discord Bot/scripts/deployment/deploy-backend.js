@@ -28,10 +28,19 @@ async function deployBackend() {
         console.log('Deploying to server...');
         // Add your deployment logic here (e.g., AWS, Docker, etc.)
         
-        if (process.env.DEPLOY_PLATFORM === 'aws') {
-            // AWS deployment logic
-            console.log('Deploying to AWS...');
-            execSync('aws deploy create-deployment', { stdio: 'inherit' });
+        if (process.env.DEPLOY_PLATFORM === 'akash') {
+            // Akash deployment logic
+            console.log('Deploying to Akash...');
+            const AkashService = require('../../src/services/core/akash.service');
+            const akash = new AkashService();
+            const deploymentId = await akash.deployTrainingEnvironment({
+                model: 'backend',
+                datasetPath: './dist',
+                parameters: {
+                    environment: process.env.DEPLOY_ENV
+                }
+            });
+            console.log(`Deployment created on Akash with ID: ${deploymentId}`);
         } else if (process.env.DEPLOY_PLATFORM === 'docker') {
             // Docker deployment logic
             console.log('Deploying with Docker...');

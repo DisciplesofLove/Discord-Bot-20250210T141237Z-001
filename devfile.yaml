@@ -1,7 +1,6 @@
 schemaVersion: 2.0.0
 metadata:
-  name: ai-discord-bot
-  version: 1.0.0
+  name: discord-bot
 components:
   - name: dev
     container:
@@ -10,12 +9,8 @@ commands:
   - id: install
     exec:
       component: dev
-      commandLine: npm install
-  - id: build
+      commandLine: "npm install"
+  - id: build-test
     exec:
       component: dev
-      commandLine: npm run build:bot
-  - id: test
-    exec:
-      component: dev
-      commandLine: npm run test && npm run lint
+      commandLine: "npm install && npm run build && npm run test"
