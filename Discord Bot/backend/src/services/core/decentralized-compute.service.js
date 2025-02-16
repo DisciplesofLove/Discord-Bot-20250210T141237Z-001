@@ -18,6 +18,7 @@ class DecentralizedComputeService {
         this.consensusService = new ConsensusService();
         this.iotaService = new IotaService();
         this.l2Service = new L2Service();
+        this.iotaBridge = require('./iota-bridge.service');
     }
 
     async distributeComputation(modelConfig, data) {

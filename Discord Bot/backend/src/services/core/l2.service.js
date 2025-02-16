@@ -70,28 +70,64 @@ class L2Service {
     }
 
     private async getPolygonMetrics() {
-        const [gasPrice, congestion] = await Promise.all([
+        const metrics = require('./metrics.service');
+        const [gasPrice, congestion, throughput] = await Promise.all([
             this.polygon.getGasPrice(),
-            this.polygon.getNetworkCongestion()
+            this.polygon.getNetworkCongestion(),
+            this.measureNetworkThroughput('polygon')
         ]);
 
         return {
-            score: this.calculateNetworkScore(gasPrice, congestion)
+            score: this.calculateNetworkScore(gasPrice, congestion, throughput),
+            throughput: throughput,
+            congestion: congestion,
+            gasPrice: gasPrice
         };
     }
 
     private async getSolanaMetrics() {
-        const [slot, congestion] = await Promise.all([
+        const metrics = require('./metrics.service');
+        const [slot, congestion, throughput] = await Promise.all([
             this.solana.getSlot(),
-            this.solana.getRecentPerformanceSamples(1)
+            this.solana.getRecentPerformanceSamples(1),
+            this.measureNetworkThroughput('solana')
         ]);
 
         return {
-            score: this.calculateNetworkScore(slot, congestion[0])
+            score: this.calculateNetworkScore(slot, congestion[0], throughput),
+            throughput: throughput,
+            congestion: congestion[0],
+            currentSlot: slot
         };
     }
 
-    private calculateNetworkScore(metric1, metric2) {
+    private async measureNetworkThroughput(network) {
+        const metrics = require('./metrics.service');
+        const testData = Buffer.alloc(1024 * 1024); // 1MB test data
+        const operationId = `${network}-throughput-test`;
+        
+        metrics.startTimer(operationId);
+        
+        if (network === 'polygon') {
+            await this.polygon.provider.send('eth_sendRawTransaction', [testData]);
+        } else {
+            await this.solana.sendTransaction(new Transaction().add({
+                data: testData
+            }));
+        }
+        
+        const duration = metrics.endTimer(operationId);
+        return (1024 * 1024 * 1000) / duration; // Returns MB/s
+    }
+
+    private calculateNetworkScore(metric1, metric2, throughput) {
+        const throughputWeight = 0.5;
+        const costWeight = 0.3;
+        const congestionWeight = 0.2;
+        
+        return (throughput * throughputWeight) + 
+               (1 / metric1 * costWeight) + 
+               (1 / metric2 * congestionWeight);
         // Implement scoring logic based on network metrics
         return (1000 / metric1) * (1 - metric2);
     }
