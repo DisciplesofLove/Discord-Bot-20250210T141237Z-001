@@ -1,6 +1,6 @@
 # AI-Powered Decentralized Discord Bot with DAO Governance
 
-[![Love Vice Score](https://img.shields.io/badge/Love%20Vice%20Score-8.5%2F10-brightgreen)](https://lovevice.com)
+[![Love Vice Score](https://img.shields.io/badge/Love%20Vice%20Score-8.5%2F10-brightgreen)](https://joymarketplace.io)
 
 This project implements an advanced Discord bot leveraging AI, blockchain, and decentralized technologies to provide a robust platform for community engagement, governance, and AI model marketplace with a focus on decentralized deployment and operation.
 
