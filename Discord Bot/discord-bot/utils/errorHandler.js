@@ -1,4 +1,41 @@
 const logger = require('../../monitoring/logger');
+const Sentry = require('@sentry/node');
+const { ProfilingIntegration } = require('@sentry/profiling-node');
+
+// Set up global error handlers
+process.on('uncaughtException', (error) => {
+    logger.error('Uncaught Exception:', error);
+    reportErrorToMonitoring(error).finally(() => {
+        process.exit(1);
+    });
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    logger.error('Unhandled Promise Rejection:', reason);
+    reportErrorToMonitoring(reason).finally(() => {
+        process.exit(1);
+    });
+});
+
+// Initialize Sentry if DSN is provided
+if (process.env.SENTRY_DSN) {
+    Sentry.init({
+        dsn: process.env.SENTRY_DSN,
+        environment: process.env.NODE_ENV || 'development',
+        integrations: [
+            new ProfilingIntegration()
+        ],
+        tracesSampleRate: 1.0,
+        profilesSampleRate: 1.0,
+        beforeSend(event) {
+            // Don't send events for known operational errors
+            if (event.tags?.errorType === 'operational') {
+                return null;
+            }
+            return event;
+        }
+    });
+}
 
 class ErrorHandler {
     static async handle(error, interaction) {
@@ -12,15 +49,26 @@ class ErrorHandler {
 
         // Determine error type and appropriate response
         let userMessage;
+        let errorType = 'operational';  // Default to operational errors
+
         if (error.code === 'RATE_LIMITED') {
             userMessage = 'You are sending commands too quickly. Please wait a moment and try again.';
         } else if (error.code === 'CIRCUIT_OPEN') {
             userMessage = 'This service is temporarily unavailable. Please try again later.';
         } else if (error.code === 'PERMISSION_DENIED') {
             userMessage = 'You do not have permission to use this command.';
+        } else if (error.code === 'NETWORK_ERROR') {
+            userMessage = 'Network connectivity issues detected. Please try again later.';
+        } else if (error.code === 'API_ERROR') {
+            userMessage = 'External service error. Please try again later.';
+            errorType = 'external';  // Mark as external service error
         } else {
             userMessage = 'An unexpected error occurred. Please try again later.';
+            errorType = 'programming';  // Mark as programming error for non-operational errors
         }
+        
+        // Add error context
+        error.errorType = errorType;
 
         // Respond to the user if possible
         try {
@@ -42,14 +90,16 @@ class ErrorHandler {
 
 async function reportErrorToMonitoring(error) {
     try {
-        // Implementation for your error reporting service (e.g., Sentry)
         if (process.env.SENTRY_DSN) {
-            const Sentry = require('@sentry/node');
             Sentry.captureException(error);
+            await Sentry.flush(2000); // Ensure events are sent before shutdown
         }
     } catch (reportError) {
         logger.error('Error reporting to monitoring service:', reportError);
     }
 }
 
-module.exports = ErrorHandler;
+module.exports = {
+    ErrorHandler,
+    reportErrorToMonitoring
+};
