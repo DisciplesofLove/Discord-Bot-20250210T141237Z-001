@@ -1,4 +1,5 @@
 const Web3 = require('web3');
+const gnosisSafe = require('../../../services/integration/gnosis-safe.service');
 const logger = require('./logger');
 
 class ContractManager {
@@ -50,6 +51,10 @@ class ContractManager {
     }
 
     async sendTransaction(contractName, methodName, fromAddress, ...args) {
+        if (contractName === 'Treasury') {
+            // For treasury transactions, use Gnosis Safe
+            return await gnosisSafe.proposeTreasurySafeTransaction(...args);
+        }
         try {
             const contract = this.contracts.get(contractName);
             if (!contract) {

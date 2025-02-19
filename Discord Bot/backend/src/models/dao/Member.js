@@ -1,6 +1,36 @@
 const mongoose = require('mongoose');
 
+const reputationSchema = new mongoose.Schema({
+    loveScore: {
+        type: Number,
+        default: 0,
+        min: 0
+    },
+    viceScore: {
+        type: Number,
+        default: 0,
+        min: 0
+    },
+    lastUpdateTime: {
+        type: Date,
+        default: Date.now
+    },
+    reputationHistory: [{
+        action: String,
+        points: Number,
+        type: {
+            type: String,
+            enum: ['LOVE', 'VICE']
+        },
+        timestamp: {
+            type: Date,
+            default: Date.now
+        }
+    }]
+});
+
 const MemberSchema = new mongoose.Schema({
+    reputation: reputationSchema,
     discordId: { type: String, required: true, unique: true },
     username: { type: String, required: true },
     loveScore: { type: Number, default: 0 }, // Positive reputation score
