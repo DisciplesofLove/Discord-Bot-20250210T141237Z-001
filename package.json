@@ -1,0 +1,37 @@
+{
+  "name": "decentralized-discord-bot",
+  "version": "1.0.0",
+  "description": "Fully decentralized Discord bot with P2P capabilities",
+  "main": "bot.js",
+  "dependencies": {
+    "discord.js": "^14.11.0",
+    "dotenv": "^16.0.3",
+    "@sentry/node": "^7.0.0",
+    "winston": "^3.8.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.44.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "jest": "^29.6.1",
+    "nodemon": "^2.0.22",
+    "prettier": "^2.8.8"
+  },
+  "scripts": {
+    "start": "node bot.js",
+    "dev": "nodemon bot.js --watch .",
+    "test": "jest --coverage",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "build": "echo 'No build step required for JS bot'",
+    "setup:discord": "node commands/deploy-commands.js",
+    "test:unit": "jest tests/unit",
+    "test:integration": "jest tests/integration",
+    "test:watch": "jest --watch"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "author": "",
+  "license": "MIT"
+}
