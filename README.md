@@ -239,3 +239,5 @@ Key decentralized services:
 - `AkashService`: Manages deployment of training environments on Akash Network
 
 By leveraging these decentralized technologies, the Discord bot achieves a high level of resilience, scalability, and censorship resistance.
+Visit Our Discord to Get Involved in Decentralized A.I. https://discord.com/channels/1333920429546672263/1336103019246391469
+Visit Our Discord for SDG 2030 Discord, https://discord.com/channels/1332746516963524609/1332750850761687052
